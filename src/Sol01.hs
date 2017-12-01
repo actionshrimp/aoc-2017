@@ -18,6 +18,7 @@ f skip a i | (input !! i) == (inputLoop !! (i + skip) ) = a + (digitToInt (input
 solve skip = foldl (f skip) 0 [0..(l - 1)]
 
 part1 = solve 1
+part2 = solve (l `quot` 2)
 
 sol01 :: IO ()
-sol01 = putStrLn (show part1)
+sol01 = putStrLn (show part2)
