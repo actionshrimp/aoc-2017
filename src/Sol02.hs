@@ -4,6 +4,7 @@ module Sol02
 
 import Data.List (sort)
 import Data.List.Split (splitOn)
+import Control.Monad (guard)
 
 input = "\
 \737\t1866\t1565\t1452\t1908\t1874\t232\t1928\t201\t241\t922\t281\t1651\t1740\t1012\t1001\n\
@@ -37,7 +38,18 @@ rowDiff r = rowMax - rowMin
     rowMin = head sorted
     rowMax = last sorted
 
-part1 = sum (map rowDiff parsedInput)
+evenlyDivisible :: [Int] -> (Int, Int)
+evenlyDivisible r = head $ do
+  a <- r
+  b <- r
+  guard (a /= b && a `rem` b == 0)
+  return (a, b)
+
+pairDiv :: (Int, Int) -> Int
+pairDiv (a, b) = a `quot` b
+
+part1 = sum . map rowDiff $ parsedInput
+part2 = sum . map (pairDiv . evenlyDivisible) $ parsedInput
 
 sol02 :: IO ()
-sol02 = putStrLn (show part1)
+sol02 = putStrLn (show part2)
