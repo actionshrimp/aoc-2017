@@ -26,10 +26,11 @@ input = "\
 \"
 
 parsedInput :: [[Int]]
-parsedInput = map parseLine $ lines input
-  where
-    parseCell c = (read c) :: Int
-    parseLine l = map parseCell . splitOn "\t" $ l
+parsedInput = do
+  l <- lines input
+  return $ do
+    c <- splitOn "\t" l
+    [(read c) :: Int]
 
 rowDiff :: [Int] -> Int
 rowDiff r = rowMax - rowMin
