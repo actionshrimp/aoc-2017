@@ -33,11 +33,8 @@ parsedInput = do
     [(read c) :: Int]
 
 rowDiff :: [Int] -> Int
-rowDiff r = rowMax - rowMin
-  where
-    sorted = sort r
-    rowMin = head sorted
-    rowMax = last sorted
+rowDiff r = (last s) - (head s)
+  where s = sort r
 
 evenlyDivisible :: [Int] -> (Int, Int)
 evenlyDivisible r = head $ do
