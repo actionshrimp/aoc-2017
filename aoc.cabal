@@ -22,6 +22,7 @@ library
   exposed-modules:     Sol01
                      , Sol02
                      , Sol03
+                     , Sol04
   build-depends:       base >= 4.7 && < 5
                      , split
                      , containers
