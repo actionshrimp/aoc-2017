@@ -2,27 +2,36 @@ module Sol05
     (sol05
     ) where
 
-import Data.Sequence as Seq
+import Control.Monad.Primitive
+import qualified Data.Vector as V
+import qualified Data.Vector.Mutable as VM
 
-calcSteps :: (Int -> Int) -> Int -> Int -> Seq Int -> Int
-calcSteps f c i xs = if i >= Seq.length xs
-  then c
-  else let j = Seq.index xs i
-       in calcSteps f (c+1) (i+j) (Seq.update i (f j) xs)
+calcSteps :: PrimMonad m => (Int -> Int) -> Int -> Int -> V.MVector (PrimState m) Int -> m Int
+calcSteps f c i xs =
+  if i >= VM.length xs
+  then return c
+  else do
+    j <- VM.read xs i
+    VM.write xs i (f j)
+    calcSteps f (c+1) (i+j) xs
 
-parseInput f = Seq.fromList $ do
+parseInput f = V.thaw $ V.fromList $ do
   l <- lines f
   return $ (read l :: Int)
 
-part1 :: Seq Int -> Int
+part1 :: PrimMonad m => V.MVector (PrimState m) Int -> m Int
 part1 = calcSteps ((+) 1) 0 0
 
-part2 :: Seq Int -> Int
+part2 :: PrimMonad m => V.MVector (PrimState m) Int -> m Int
 part2 = calcSteps (\j -> if j >= 3 then j-1 else j+1) 0 0
 
 sol05 :: IO ()
 sol05 = do
   input <- readFile "data/05.txt"
-  putStrLn (show . part1 . parseInput $ input)
-  putStrLn (show . part2 . parseInput $ input)
+  i1 <- parseInput input
+  p1 <- part1 i1
+  putStrLn (show p1)
+  i2 <- parseInput input
+  p2 <- part2 i2
+  putStrLn (show p2)
 
