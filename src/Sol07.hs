@@ -33,8 +33,8 @@ mappingParser = do
 parseInput :: String -> String -> Either ParseError [Mapping]
 parseInput fname input = parse (many mappingParser) fname input
 
-nameOfRoot :: [Mapping] -> String
-nameOfRoot ms = let
+part1 :: [Mapping] -> String
+part1 ms = let
   names = S.fromList $ map name ms
   refs = S.fromList $ concatMap supports ms
   in
@@ -43,5 +43,5 @@ nameOfRoot ms = let
 sol07 :: IO ()
 sol07 = let fname = "data/07.txt" in do
   input <- readFile fname
-  putStrLn (show (fmap nameOfRoot (parseInput fname input)))
+  putStrLn (show (fmap part1 (parseInput fname input)))
 
