@@ -33,7 +33,11 @@ firstAlreadySeen xs = go 0 M.empty xs
 
 part1 = fst $ firstAlreadySeen (iterate redistribute input)
 
+part2 = let (_, loopStart) = firstAlreadySeen (iterate redistribute input)
+  in fst $ firstAlreadySeen (iterate redistribute loopStart)
+
 sol06 :: IO ()
 sol06 = do
   putStrLn (show part1)
+  putStrLn (show part2)
 
