@@ -5,6 +5,7 @@ import Sol02
 import Sol03
 import Sol04
 import Sol05
+import Sol06
 
 main :: IO ()
-main = sol05
+main = sol06
