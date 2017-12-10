@@ -8,7 +8,7 @@ import Text.Parsec.String
 import Debug.Trace (trace)
 import Data.Maybe (fromMaybe)
 import qualified Data.Map as M
-import Data.List (maximumBy)
+import Data.List (maximumBy, sort)
 import Data.Ord (comparing)
 import Control.Monad.Writer
 
@@ -69,17 +69,25 @@ parseInst = do
 
 type Env = M.Map String Int
 
-runInst :: (Monoid w, MonadWriter w m) => Env -> Inst -> m Env
+runInst :: Env -> Inst -> Writer [Int] Env
 runInst e (Inst{reg, op, val, compReg, comp, compVal}) =
   if (comp (fromMaybe 0 (M.lookup compReg e)) compVal)
-  then return $ M.alter (\x -> Just (op (fromMaybe 0 x) val)) reg e
+  then let newV = op (fromMaybe 0 (M.lookup reg e)) val in do
+      tell [newV]
+      return $ M.insert reg newV e
   else return e
 
 part1 :: [Inst] -> (String, Int)
 part1 insts = let
   final = foldM runInst M.empty insts
-  (result, _) = runWriter final :: (Env, [String])
+  (result, _) = runWriter final :: (Env, [Int])
   in maximumBy (comparing snd) (M.toList result)
+
+part2 :: [Inst] -> Int
+part2 insts = let
+  final = foldM runInst M.empty insts
+  (result, vals) = runWriter final :: (Env, [Int])
+  in last $ (sort vals)
 
 parseInput :: String -> String -> Either ParseError [Inst]
 parseInput fname input = parse (many parseInst) fname input
@@ -87,4 +95,5 @@ parseInput fname input = parse (many parseInst) fname input
 run :: IO ()
 run = let fname = "data/08.txt" in do
   input <- readFile fname
-  putStrLn (show (fmap part1 (parseInput fname input)))
+  putStrLn $ "part 1: " ++ (show (fmap part1 (parseInput fname input)))
+  putStrLn $ "part 2: " ++ (show (fmap part2 (parseInput fname input)))
