@@ -1,3 +1,4 @@
+{-# LANGUAGE NamedFieldPuns #-}
 module Sol08
     (run
     ) where
@@ -5,12 +6,13 @@ module Sol08
 import Text.Parsec
 import Text.Parsec.String
 import Debug.Trace (trace)
+import Data.Maybe (fromMaybe)
+import qualified Data.Map as M
+import Data.List (maximumBy)
+import Data.Ord (comparing)
 
-data Op = Inc | Dec
-  deriving Show
-
-data Comp = CLTE | CLT | CEQ | CNEQ | CGT | CGTE
-  deriving Show
+type Op = (Int -> Int -> Int)
+type Comp = (Int -> Int -> Bool)
 
 data Inst
   = Inst { reg :: String
@@ -20,24 +22,23 @@ data Inst
          , comp :: Comp
          , compVal :: Int
          }
-  deriving Show
 
 parseOp :: Parser Op
 parseOp =
-  (string "inc" >> (return Inc)) <|>
-  (string "dec" >> (return Dec))
+  (string "inc" >> (return (+))) <|>
+  (string "dec" >> (return (-)))
 
 parseComp :: Parser Comp
 parseComp = do
   s <- many1 (oneOf "<>!=")
   return $
     case s of
-      "<=" -> CLTE
-      ">=" -> CGTE
-      "==" -> CEQ
-      "!=" -> CNEQ
-      ">"  -> CGT
-      "<"  -> CLT
+      "<=" -> (<=)
+      ">=" -> (>=)
+      "==" -> (==)
+      "!=" -> (/=)
+      ">"  -> (>)
+      "<"  -> (<)
 
 parseInt :: Parser Int
 parseInt = do
@@ -65,10 +66,23 @@ parseInst = do
     compReg = compReg, comp = comp, compVal = compVal
     }
 
+type Env = M.Map String Int
+
+runInst :: Env -> Inst -> Env
+runInst e (Inst{reg, op, val, compReg, comp, compVal}) =
+  if (comp (fromMaybe 0 (M.lookup compReg e)) compVal)
+  then M.alter (\x -> Just (op (fromMaybe 0 x) val)) reg e
+  else e
+
+part1 :: [Inst] -> (String, Int)
+part1 insts = let
+  final = foldl runInst M.empty insts
+  in maximumBy (comparing snd) (M.toList final)
+
 parseInput :: String -> String -> Either ParseError [Inst]
 parseInput fname input = parse (many parseInst) fname input
 
 run :: IO ()
 run = let fname = "data/08.txt" in do
   input <- readFile fname
-  putStrLn (show (fmap head (parseInput fname input)))
+  putStrLn (show (fmap part1 (parseInput fname input)))
