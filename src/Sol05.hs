@@ -1,5 +1,5 @@
 module Sol05
-    (sol05
+    (run
     ) where
 
 import Control.Monad.Primitive
@@ -25,8 +25,8 @@ part1 = calcSteps ((+) 1) 0 0
 part2 :: PrimMonad m => V.MVector (PrimState m) Int -> m Int
 part2 = calcSteps (\j -> if j >= 3 then j-1 else j+1) 0 0
 
-sol05 :: IO ()
-sol05 = do
+run :: IO ()
+run = do
   input <- readFile "data/05.txt"
   i1 <- parseInput input
   p1 <- part1 i1

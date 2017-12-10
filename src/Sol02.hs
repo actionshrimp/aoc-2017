@@ -1,5 +1,5 @@
 module Sol02
-    (sol02
+    (run
     ) where
 
 import Data.List (sort)
@@ -49,5 +49,5 @@ pairDiv (a, b) = a `quot` b
 part1 = sum . map rowDiff $ parsedInput
 part2 = sum . map (pairDiv . evenlyDivisible) $ parsedInput
 
-sol02 :: IO ()
-sol02 = putStrLn (show part2)
+run :: IO ()
+run = putStrLn (show part2)

@@ -1,5 +1,5 @@
 module Sol07
-    (sol07
+    (run
     ) where
 
 import Text.Parsec
@@ -86,8 +86,8 @@ part2 ms = let
     (name, curTotal, expectedTotal, curW, expectedW) <- solvePart2 bn root
     return expectedW
 
-sol07 :: IO ()
-sol07 = let fname = "data/07.txt" in do
+run :: IO ()
+run = let fname = "data/07.txt" in do
   input <- readFile fname
   putStrLn (show (fmap part2 (parseInput fname input)))
 

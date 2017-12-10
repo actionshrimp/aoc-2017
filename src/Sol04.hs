@@ -1,5 +1,5 @@
 module Sol04
-    (sol04
+    (run
     ) where
 
 import Control.Monad (guard)
@@ -35,7 +35,7 @@ part1 = length . validPhrases validPhrasePart1
 part2 :: [[String]] -> Int
 part2 = length . validPhrases validPhrasePart2
 
-sol04 :: IO ()
-sol04 = do
+run :: IO ()
+run = do
   input <- readFile "data/04.txt"
   putStrLn (show (part2 . parsePhrases $ input))

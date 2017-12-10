@@ -1,5 +1,5 @@
 module Sol06
-    (sol06
+    (run
     ) where
 
 import Data.Function (on)
@@ -36,8 +36,8 @@ part1 = fst $ firstAlreadySeen (iterate redistribute input)
 part2 = let (_, loopStart) = firstAlreadySeen (iterate redistribute input)
   in fst $ firstAlreadySeen (iterate redistribute loopStart)
 
-sol06 :: IO ()
-sol06 = do
+run :: IO ()
+run = do
   putStrLn (show part1)
   putStrLn (show part2)
 

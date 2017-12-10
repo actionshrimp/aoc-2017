@@ -1,5 +1,5 @@
 module Sol03
-    (sol03
+    (run
     ) where
 
 import qualified Data.Map as M
@@ -64,5 +64,5 @@ theSeq = go 277678 M.empty (0, 0) R
 
 part2 = last theSeq
 
-sol03 :: IO ()
-sol03 = putStrLn (show part2)
+run :: IO ()
+run = putStrLn (show part2)
