@@ -33,6 +33,7 @@ library
                      , vector
                      , primitive
                      , parsec
+                     , mtl
   default-language:    Haskell2010
 
 executable aoc-exe

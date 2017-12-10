@@ -10,6 +10,7 @@ import Data.Maybe (fromMaybe)
 import qualified Data.Map as M
 import Data.List (maximumBy)
 import Data.Ord (comparing)
+import Control.Monad.Writer
 
 type Op = (Int -> Int -> Int)
 type Comp = (Int -> Int -> Bool)
@@ -68,16 +69,17 @@ parseInst = do
 
 type Env = M.Map String Int
 
-runInst :: Env -> Inst -> Env
+runInst :: (Monoid w, MonadWriter w m) => Env -> Inst -> m Env
 runInst e (Inst{reg, op, val, compReg, comp, compVal}) =
   if (comp (fromMaybe 0 (M.lookup compReg e)) compVal)
-  then M.alter (\x -> Just (op (fromMaybe 0 x) val)) reg e
-  else e
+  then return $ M.alter (\x -> Just (op (fromMaybe 0 x) val)) reg e
+  else return e
 
 part1 :: [Inst] -> (String, Int)
 part1 insts = let
-  final = foldl runInst M.empty insts
-  in maximumBy (comparing snd) (M.toList final)
+  final = foldM runInst M.empty insts
+  (result, _) = runWriter final :: (Env, [String])
+  in maximumBy (comparing snd) (M.toList result)
 
 parseInput :: String -> String -> Either ParseError [Inst]
 parseInput fname input = parse (many parseInst) fname input
