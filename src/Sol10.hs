@@ -3,7 +3,9 @@ module Sol10
     (run
     ) where
 
-import Data.List.Split (splitOn)
+import Data.List.Split (splitOn, chunksOf)
+import Data.Bits (xor)
+import Numeric (showHex)
 import Debug.Trace (trace)
 
 data HashSt
@@ -23,24 +25,46 @@ hashFn x@(HashSt { rope, pos, skip }) l = let
     , pos = (pos + (l + skip)) `rem` ropeLen
     , skip = skip + 1}
 
-parseInput :: String -> [Int]
-parseInput i = map read $ splitOn "," i
-
 runHashFn :: Int -> [Int] -> HashSt
 runHashFn ropeLen ls = (foldl hashFn (initHashSt ropeLen) ls)
 
 rawInput = "130,126,1,11,140,2,255,207,18,254,246,164,29,104,0,224"
 
+part1Input :: [Int]
+part1Input = map read $ splitOn "," rawInput
+
+asciiCode :: Char -> Int
+asciiCode = fromEnum
+
+extraLengths :: [Int]
+extraLengths = [17, 31, 73, 47, 23]
+
+part2Input :: [Int]
+part2Input = (map asciiCode rawInput) ++ extraLengths
+
 example :: Int
 example = let (a:b:_) = (rope (runHashFn 5 [3, 4, 1, 5])) in
   a * b
 
-part1 :: [Int] -> Int
-part1 input = let (a:b:_) = (rope (runHashFn 256 input)) in
+part1 :: Int
+part1 = let (a:b:_) = (rope (runHashFn 256 part1Input)) in
   a * b
 
+int256AsHexStr :: Int -> String
+int256AsHexStr x | x < 16 = "0" ++ showHex x ""
+                 | otherwise = showHex x ""
+
+knotHash :: String -> String
+knotHash input = let
+  fullInput = (map asciiCode input ++ extraLengths)
+  sparseHash = (rope (runHashFn 256 (take (64 * (length fullInput)) (cycle fullInput))))
+  denseHash = map (foldl1 xor) (chunksOf 16 sparseHash)
+  in concatMap int256AsHexStr denseHash
+
+part2 :: String
+part2 = knotHash rawInput
+
 run :: IO ()
-run = let
-  input = (parseInput rawInput)
-  in do
-  putStrLn $ "part 1: " ++ show (part1 input)
+run = do
+  putStrLn $ "part 1: " ++ show part1
+  putStrLn $ "part 2: " ++ show part2
