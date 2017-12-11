@@ -28,6 +28,7 @@ library
                      , Sol07
                      , Sol08
                      , Sol09
+                     , Sol10
   build-depends:       base >= 4.7 && < 5
                      , split
                      , containers
