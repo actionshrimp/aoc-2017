@@ -9,7 +9,8 @@ module Main where
 -- import Sol07
 -- import Sol08
 -- import Sol09
-import Sol10
+-- import Sol10
+import Sol11
 
 main :: IO ()
 main = run
