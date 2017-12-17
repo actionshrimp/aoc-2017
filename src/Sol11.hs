@@ -16,12 +16,28 @@ addStepType (n, w)  "s" = (n - 2, w    )
 addStepType (n, w) "se" = (n - 1, w - 1)
 addStepType (n, w) "sw" = (n - 1, w + 1)
 
+distance :: (Int, Int) -> Int
+distance (n, w) = let total = abs n + abs w in
+  total `div` 2 + total `rem` 2
+
 part1 :: [String] -> Int
 part1 input = let
-  (n, w) = foldl addStepType (0, 0) input
-  total = abs n + abs w
+  coords = foldl addStepType (0, 0) input
+  in distance coords
+
+addStepWithMax :: (Int, (Int, Int)) -> String -> (Int, (Int, Int))
+addStepWithMax (maxDist, coords) x = let
+  newCoords = addStepType coords x
+  newDist = distance newCoords
   in
-  total `div` 2 + total `rem` 2
+    if newDist > maxDist
+    then (newDist, newCoords)
+    else (maxDist, newCoords)
+
+part2 :: [String] -> Int
+part2 input = let
+  (max, _) = foldl addStepWithMax (0, (0, 0)) input
+  in max
 
 example1 = part1 ["ne", "ne", "ne"]             -- 3
 example2 = part1 ["ne", "ne", "sw", "sw"]       -- 0
@@ -38,3 +54,4 @@ run = do
   rawInput <- readFile "data/11.txt"
   let input = parseInput rawInput
   putStrLn $ "part1: " ++ (show (part1 input))
+  putStrLn $ "part2: " ++ (show (part2 input))
