@@ -3,6 +3,7 @@ module Sol13
     (run
     ) where
 
+import Data.List (elemIndex)
 import Data.List.Split (splitOn)
 import qualified Data.Set as S
 
@@ -40,16 +41,22 @@ walkWall (wx,wy) (l:ls) =
     s@Scanner{y, range} -> if wy == y then [wx * range] else [])
   ++ walkWall (wx+1, wy) (stepFirewall ls)
 
+exampleInput :: [(Int, Int)]
 exampleInput = [(0, 3), (1, 2), (4, 4), (6, 4)]
 
-part1 :: [(Int, Int)] -> Int
-part1 input = let
+part1BruteForce :: [(Int, Int)] -> Int
+part1BruteForce input = let
   is = initState input
   in foldl (+) 0 $ walkWall (0, 0) is
+
+part2BruteForce :: [(Int, Int)] -> Maybe Int
+part2BruteForce input = let
+  is = initState input
+  in elemIndex [] $ map (walkWall (0, 0)) (iterate stepFirewall is)
 
 run :: IO ()
 run = do
   rawInput <- readFile "data/13.txt"
   let input = parseInput rawInput
-  putStrLn $ "part1: " ++ (show (part1 input))
-  -- putStrLn $ "part2: " ++ (show (part2 input))
+  putStrLn $ "part1: " ++ (show (part1BruteForce input))
+  putStrLn $ "part2: " ++ (show (part2BruteForce input))
