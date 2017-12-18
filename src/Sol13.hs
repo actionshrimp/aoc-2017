@@ -3,7 +3,8 @@ module Sol13
     (run
     ) where
 
-import Data.List (elemIndex)
+import Data.Ord (comparing)
+import Data.List (elemIndex, sortBy)
 import Data.List.Split (splitOn)
 import Data.Maybe (catMaybes)
 import qualified Data.Set as S
@@ -40,7 +41,10 @@ found (x@(depth, range):xs) delay =
   else found xs delay
 
 part2Faster :: [(Int, Int)] -> Int
-part2Faster input = head $ filter (not . found input) [0..]
+part2Faster input = let
+  sortedInput = sortBy (comparing snd) input
+  in
+  head $ filter (not . found sortedInput) [0..]
 
 run :: IO ()
 run = do
