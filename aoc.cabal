@@ -31,6 +31,7 @@ library
                      , Sol10
                      , Sol11
                      , Sol12
+                     , Sol13
   build-depends:       base >= 4.7 && < 5
                      , split
                      , containers
