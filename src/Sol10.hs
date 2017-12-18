@@ -1,6 +1,6 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module Sol10
-    (run
+    (run, knotHash
     ) where
 
 import Data.List.Split (splitOn, chunksOf)
