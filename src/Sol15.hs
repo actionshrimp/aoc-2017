@@ -37,6 +37,19 @@ part1 = let
   b = (gen (seeds !! 1) (factors !! 1) divisor)
   in length $ filter id $ take 40000000 $ zipWith rightmostMatch a b
 
+part2Example :: [Bool]
+part2Example = let
+  a = filter (\x -> x `mod` 4 == 0) (gen 65   (factors !! 0) divisor)
+  b = filter (\x -> x `mod` 8 == 0) (gen 8921 (factors !! 1) divisor)
+  in take 10 $ drop 1050 $ zipWith rightmostMatch a b
+
+part2 :: Int
+part2 = let
+  a = filter (\x -> x `mod` 4 == 0) (gen (seeds !! 0) (factors !! 0) divisor)
+  b = filter (\x -> x `mod` 8 == 0) (gen (seeds !! 1) (factors !! 1) divisor)
+  in length $ filter id $ take 5000000 $ zipWith rightmostMatch a b
+
 run :: IO ()
 run = do
   putStrLn $ "part1: " ++ (show part1)
+  putStrLn $ "part2: " ++ (show part2)
