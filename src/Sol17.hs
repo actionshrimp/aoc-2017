@@ -26,12 +26,18 @@ part1 spinSize times = let
   (p, vals) = foldl' (spinlock spinSize) (0, S.singleton 0) [1..times]
   in S.index vals (p+1)
 
-part2 :: Int -> Int -> Maybe Int
+spinlockLite :: Int -> (Int, Int) -> Int -> (Int, Int)
+spinlockLite spin (pos, after0) i =
+  let entry = (pos + spin) `rem` i + 1
+  in (entry, if entry == 1 then i else after0)
+
+part2 :: Int -> Int -> Int
 part2 spinSize times = let
-  (p, vals) = foldl' (spinlock spinSize) (0, S.singleton 0) [1..times]
-  in do
-    pos0 <- S.elemIndexL 0 vals
-    return $ S.index vals (pos0 + 1)
+  (_, pos0) = foldl' (spinlockLite spinSize) (0, 0) [1..times]
+  in pos0
+
+example2 :: Int -> (Int, Int)
+example2 i = foldl' (spinlockLite exampleInput) (0, 0) [1..i]
 
 run :: IO ()
 run = do
