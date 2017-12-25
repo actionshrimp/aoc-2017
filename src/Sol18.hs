@@ -10,6 +10,8 @@ import Data.List.Split (splitOn)
 type Reg = Char
 type Val = Int
 
+type Regs = M.Map Reg Val
+
 data Target
   = TReg Reg
   | TVal Val
@@ -23,10 +25,9 @@ data Instruction
   | Rcv Target
   | Jgz Target Target
 
+
 data Env = Env
-  { regs :: M.Map Reg Val
-  , sound :: Maybe Val
-  , rcvds :: [Val]
+  { regs :: Regs
   , prog :: [Instruction]
   , i :: Int
   }
@@ -38,37 +39,31 @@ val e (TVal v) = v
 inc :: Env -> Int -> Env
 inc e@(Env { i, prog }) j = e { i = (i + j) `rem` (length prog) }
 
-runInst :: Env -> Instruction -> Env
-runInst e@(Env { i }) (Snd t) = (inc e 1) { sound = Just (val e t) }
-runInst e@(Env { i, regs }) (Set r t) = (inc e 1) { regs = M.insert r (val e t) regs  }
-runInst e@(Env { i, regs }) (Add r t) = (inc e 1) { regs = M.adjust ((+) (val e t)) r regs  }
-runInst e@(Env { i, regs }) (Mul r t) = (inc e 1) { regs = M.adjust ((*) (val e t)) r regs  }
-runInst e@(Env { i, regs }) (Mod r t) = (inc e 1) { regs = M.adjust ((flip rem) (val e t)) r regs  }
-runInst e@(Env { i, sound, rcvds }) (Rcv t) = if (val e t) /= 0
-                                              then (inc e 1) { rcvds = rcvds ++ (catMaybes [sound]) }
-                                              else (inc e 1)
-runInst e@(Env { i, regs }) (Jgz tc tv) = if (val e tc) > 0
-                                          then (inc e (val e tv))
-                                          else (inc e 1)
+runPart1 :: (Env, Maybe Int) -> Maybe Int
+runPart1 (e@(Env { i, regs, prog }), s) = let
+  inst = prog !! i
+  e' = (inc e 1)
+  in
+  case inst of
+    (Snd t)     -> runPart1 (e', Just (val e t))
+    (Set r t)   -> runPart1 (e' { regs = M.insert r (val e t) regs }, s)
+    (Add r t)   -> runPart1 (e' { regs = M.adjust ((+) (val e t)) r regs }, s)
+    (Mul r t)   -> runPart1 (e' { regs = M.adjust ((*) (val e t)) r regs }, s)
+    (Mod r t)   -> runPart1 (e' { regs = M.adjust ((flip rem) (val e t)) r regs }, s)
+    (Rcv t)     -> if (val e t) /= 0 then s else runPart1 (e', s)
+    (Jgz tc tv) -> runPart1 (if (val e tc) > 0 then (inc e (val e tv)) else e', s)
 
 mkEnv :: [Instruction] -> Env
 mkEnv insts = Env
   { regs = M.empty
-  , sound = Nothing
-  , rcvds = []
   , prog = insts
   , i = 0
   }
 
-toFirstReceive :: [Instruction] -> Int
-toFirstReceive insts = let
-  e = mkEnv insts
-  go env = let
-    inst = (prog env) !! (i env)
-    env' = runInst env inst
-    rs = (rcvds env') in
-    if (length rs) > 0 then (head rs) else go env'
-  in go e
+part1 :: [Instruction] -> Maybe Int
+part1 insts = let
+  e = mkEnv insts in
+  runPart1 (e, Nothing)
 
 parseTarget :: String -> Target
 parseTarget s | (head s) `elem` ['a'..'z'] = TReg (head s)
@@ -102,7 +97,7 @@ exampleInstrs = parseInput exampleInstrsRaw
 
 run :: IO ()
 run = do
-  putStrLn $ "example: " ++ (show (toFirstReceive exampleInstrs))
+  putStrLn $ "example: " ++ (show (part1 exampleInstrs))
   inputRaw <- readFile "data/18.txt"
   let input = parseInput inputRaw
-  putStrLn $ "part1: " ++ (show (toFirstReceive input))
+  putStrLn $ "part1: " ++ (show (part1 input))
