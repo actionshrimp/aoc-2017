@@ -38,6 +38,7 @@ library
                      , Sol17
                      , Sol18
                      , Sol19
+                     , Sol20
   build-depends:       base >= 4.7 && < 5
                      , split
                      , containers
@@ -46,6 +47,7 @@ library
                      , parsec
                      , mtl
                      , deepseq
+                     , regex-posix
   default-language:    Haskell2010
 
 executable aoc-exe

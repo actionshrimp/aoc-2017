@@ -18,7 +18,8 @@ module Main where
 -- import Sol16
 -- import Sol17
 -- import Sol18
-import Sol19
+-- import Sol19
+import Sol20
 
 main :: IO ()
 main = run
