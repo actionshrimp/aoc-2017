@@ -38,17 +38,18 @@ samedir (U, (y, x)) = (U, (y-1, x))
 samedir (L, (y, x)) = (L, (y, x-1))
 samedir (R, (y, x)) = (R, (y, x+1))
 
-walk :: [[Char]] -> (Dir, (Int, Int)) -> [Char]
-walk route (d, z@(y, x)) = let
+walk :: [[Char]] -> (Dir, (Int, Int)) -> (Int, [Char]) -> (Int, [Char])
+walk route (d, z@(y, x)) (i, as) = let
   Just item = rlkp route z
   in case item of
-       '+' -> walk route (cdir route (d, z))
-       i | i `elem` letters -> i : walk route (samedir (d, z))
-       ' ' -> []
-       _ -> walk route (samedir (d, z))
+       '+' -> walk route (cdir route (d, z)) (i+1, as)
+       l | l `elem` letters -> walk route (samedir (d, z)) (i+1, as ++ [l])
+       ' ' -> (i, as)
+       _ -> walk route (samedir (d, z)) (i+1, as)
 
 run :: IO ()
 run = do
   input <- readFile "data/19.txt"
   let route = lines input
-  putStrLn ("part1: " ++ (show (walk route start)))
+  putStrLn ("part1: " ++ (show (snd (walk route start (0, [])))))
+  putStrLn ("part2: " ++ (show (fst (walk route start (0, [])))))
