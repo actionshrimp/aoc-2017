@@ -4,7 +4,7 @@ module Sol21
     ) where
 
 import Data.List.Split (splitOn, chunksOf)
-import Data.List (partition, findIndex, find, transpose, nub)
+import Data.List (partition, find, transpose, nub)
 import Data.Maybe (fromMaybe)
 import qualified Data.Map as M
 import Debug.Trace (trace)
@@ -78,9 +78,9 @@ example = let
   result = last $ take 3 $ iterate (enhance exampleRules) seed
   in (length $ filter (\x -> x == '#') $ concat result, result)
 
-part1 :: Rules -> (Int, [String])
-part1 rules = let
-  results = take 6 $ iterate (enhance rules) seed
+stillOnAfter :: Int -> Rules -> (Int, [String])
+stillOnAfter n rules = let
+  results = take (n+1) $ iterate (enhance rules) seed
   result = last $ results
   on = length $ filter (\x -> x == '#') $ concat result
   in (on, result)
@@ -94,6 +94,9 @@ run :: IO ()
 run = do
   rulesRaw <- readFile "data/21.txt"
   let rules = parseInput . lines $ rulesRaw
-  let (on, result) = part1 rules
+  let (on, result) = stillOnAfter 5 rules
   printGrid result
+  putStrLn (show on)
+  let (on, result) = stillOnAfter 18 rules
+  -- printGrid result
   putStrLn (show on)
