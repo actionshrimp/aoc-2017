@@ -50,6 +50,24 @@ stepPart1 (x, c@Carrier {dir, pos = pos@(px, py)}, inf) = let
     Nothing -> x + 1
   in (x', c {dir = dir', pos = (px + d'x, py + d'y)}, inf')
 
+stepPart2 :: (Int, Carrier, States) -> (Int, Carrier, States)
+stepPart2 (x, c@Carrier {dir, pos = pos@(px, py)}, inf) = let
+  state = M.lookup pos inf
+  dir'@(d'x, d'y) = case state of
+    Nothing -> turnLeft dir
+    Just Weakened -> dir
+    Just Infected -> turnRight dir
+    Just Flagged -> turnRight . turnRight $ dir
+  inf' = case state of
+    Nothing -> M.insert pos Weakened inf
+    Just Weakened -> M.update (const (Just Infected)) pos inf
+    Just Infected -> M.update (const (Just Flagged)) pos inf
+    Just Flagged -> M.delete pos inf
+  x' = case state of
+    Just Weakened -> x + 1
+    _ -> x
+  in (x', c {dir = dir', pos = (px + d'x, py + d'y)}, inf')
+
 exampleSeed = seed $ "..#\n#..\n..."
 
 causedInfection stepper seed steps = let
@@ -57,8 +75,12 @@ causedInfection stepper seed steps = let
   in x
 
 examplePart1 = causedInfection stepPart1 exampleSeed 10000
+examplePart2 = causedInfection stepPart2 exampleSeed 10000000
 
 run :: IO ()
 run = do
   seedRaw <- readFile "data/22.txt"
+  putStrLn $ "examplePart1: " ++ (show examplePart1)
   putStrLn $ "part1: " ++ (show (causedInfection stepPart1 (seed seedRaw) 10000))
+  putStrLn $ "examplePart2: " ++ (show examplePart2)
+  putStrLn $ "part2: " ++ (show (causedInfection stepPart2 (seed seedRaw) 10000000))
