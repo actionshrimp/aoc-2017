@@ -41,6 +41,7 @@ library
                      , Sol20
                      , Sol21
                      , Sol22
+                     , Sol23
   build-depends:       base >= 4.7 && < 5
                      , split
                      , containers
