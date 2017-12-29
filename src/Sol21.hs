@@ -4,7 +4,7 @@ module Sol21
     ) where
 
 import Data.List.Split (splitOn, chunksOf)
-import Data.List (partition, findIndex, find, zipWith4)
+import Data.List (partition, findIndex, find, transpose, nub)
 import Data.Maybe (fromMaybe)
 import qualified Data.Map as M
 import Debug.Trace (trace)
@@ -15,16 +15,14 @@ seed =
   ,"###"
   ]
 
-ruleLineMatch :: String -> [String] -> Maybe [String]
-ruleLineMatch x rs = do
-   i <- findIndex (\r -> r == x || (reverse r) == x) rs
-   return $ (take i rs) ++ (drop (i+1) rs)
+rotateLeft :: [[a]] -> [[a]]
+rotateLeft = reverse . transpose
+
+flipsAndRots :: [String] -> [[String]]
+flipsAndRots rs = nub (take 4 (iterate rotateLeft rs)) ++ (take 4 (iterate rotateLeft (map reverse rs)) )
 
 ruleMatch :: [String] -> [String] -> Bool
-ruleMatch [] _ = True
-ruleMatch (x:xs) rs = fromMaybe False $ do
-  rs' <- ruleLineMatch x rs
-  return $ ruleMatch xs rs'
+ruleMatch xs rs = any (\r -> r == xs) $ flipsAndRots rs
 
 parseLine :: String -> ([String], [String])
 parseLine rStr = let
@@ -80,12 +78,12 @@ example = let
   result = last $ take 3 $ iterate (enhance exampleRules) seed
   in (length $ filter (\x -> x == '#') $ concat result, result)
 
-part1 :: Rules -> [[String]]
+part1 :: Rules -> (Int, [String])
 part1 rules = let
-  results = take 4 $ iterate (enhance rules) seed
+  results = take 6 $ iterate (enhance rules) seed
   result = last $ results
   on = length $ filter (\x -> x == '#') $ concat result
-  in results
+  in (on, result)
 
 printGrid :: [String] -> IO ()
 printGrid g = do
@@ -96,6 +94,6 @@ run :: IO ()
 run = do
   rulesRaw <- readFile "data/21.txt"
   let rules = parseInput . lines $ rulesRaw
-  let results = part1 rules
-  mapM_ printGrid results
-  -- putStrLn $ "part1: " ++ (show (part1 rules))
+  let (on, result) = part1 rules
+  printGrid result
+  putStrLn (show on)
