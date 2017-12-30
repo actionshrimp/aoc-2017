@@ -46,10 +46,13 @@ strength :: Cs -> Int
 strength cs = sum $ map (\(a, b) -> a+b) cs
 
 strongest :: [Cs] -> Int
-strongest bs = head . reverse . sort $ map strength bs
+strongest bs = foldl' (\acc x -> max (strength x) acc) 0 bs
 
-longestStrongest :: [Cs] -> Int
-longestStrongest bs = strength . head . reverse . sortBy (comparing length `mappend` comparing strength) $ bs
+longest :: [Cs] -> [Cs]
+longest bs = foldl' f [[]] bs where
+  f acc@(a:_) x | length x > length a = [x]
+                | length x == length a = x:acc
+                | otherwise = acc
 
 run :: IO ()
 run = do
@@ -57,10 +60,11 @@ run = do
   putStrLn "example: "
   let exampleBridges = (validBridges' (parseInput exampleComponentsRaw))
   -- mapM_ (putStrLn . show) exampleBridges
-  putStrLn $ "max strength: " ++ (show (strongest exampleBridges))
+  putStrLn $ "  max strength: " ++ (show (strongest exampleBridges))
+  putStrLn $ "  longest strongest: " ++ (show (strongest . longest $ exampleBridges))
   putStrLn ""
   putStrLn "part1: "
   let p1Bridges = (validBridges' (parseInput inputRaw))
   -- mapM_ (putStrLn . show) p1Bridges
-  putStrLn $ "max strength: " ++ (show (strongest p1Bridges))
-  putStrLn $ "longest strongest: " ++ (show (longestStrongest p1Bridges))
+  putStrLn $ "  max strength: " ++ (show (strongest p1Bridges))
+  putStrLn $ "  longest strongest: " ++ (show (strongest . longest $ p1Bridges))
