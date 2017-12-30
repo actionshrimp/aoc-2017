@@ -4,8 +4,10 @@ module Sol24
     ) where
 
 import Data.List.Split (splitOn)
-import Data.List (delete, nub, sort)
+import Data.List (delete, nub, sort, sortBy)
 import Data.Foldable (foldl')
+import Data.Ord (comparing)
+import qualified Data.Sequence as Seq
 
 --Components
 type Cs = [(Int, Int)]
@@ -46,6 +48,9 @@ strength cs = sum $ map (\(a, b) -> a+b) cs
 strongest :: [Cs] -> Int
 strongest bs = head . reverse . sort $ map strength bs
 
+longestStrongest :: [Cs] -> Int
+longestStrongest bs = strength . head . reverse . sortBy (comparing length `mappend` comparing strength) $ bs
+
 run :: IO ()
 run = do
   inputRaw <- readFile "data/24.txt"
@@ -58,3 +63,4 @@ run = do
   let p1Bridges = (validBridges' (parseInput inputRaw))
   -- mapM_ (putStrLn . show) p1Bridges
   putStrLn $ "max strength: " ++ (show (strongest p1Bridges))
+  putStrLn $ "longest strongest: " ++ (show (longestStrongest p1Bridges))
