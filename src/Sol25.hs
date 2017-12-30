@@ -70,7 +70,6 @@ run :: IO ()
 run = do
   let c = 12861455
   e <- initialEnv
-  finalEnv <- (envAfter c e)
-  result <- checksum finalEnv
+  result <- (envAfter c e) >>= checksum
   putStrLn $ "checksum after " ++ (show c) ++ ": " ++ (show result)
 
