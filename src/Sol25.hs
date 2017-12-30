@@ -5,7 +5,7 @@ module Sol25
 
 import Data.Maybe (fromMaybe)
 import qualified Data.Map as M
-import qualified Data.HashTable.Class as H
+import qualified Data.HashTable.IO as H
 import Control.Monad.ST (ST, stToIO)
 import Control.Monad (foldM)
 import qualified Data.HashTable.ST.Basic as HB
@@ -13,18 +13,18 @@ import qualified Data.HashTable.ST.Basic as HB
 data State = A|B|C|D|E|F
 data Dir = L|R
 
-data Env h = Env
-  { tape :: h
+data Env = Env
+  { tape :: H.BasicHashTable Int Int
   , state :: State
   , slot :: Int
   }
 
-val :: (H.HashTable h) => Env (h s Int Int) -> ST s Int
+val :: Env -> IO Int
 val (Env { tape, slot }) = do
   v <- H.lookup tape slot
   return $ fromMaybe 0 v
 
-next :: (H.HashTable h) => Env (h s Int Int) -> Int -> Dir -> State -> ST s (Env (h s Int Int))
+next :: Env -> Int -> Dir -> State -> IO Env
 next e@(Env {slot, tape}) v d s = do
   case v of
     0 -> H.delete tape slot
@@ -37,7 +37,7 @@ next e@(Env {slot, tape}) v d s = do
         R -> slot + 1
     }
 
-step :: (H.HashTable h) => Env (h s Int Int) -> ST s (Env (h s Int Int))
+step :: Env -> IO Env
 step  e@(Env { state })= do
   v <- val e
   case (state, v) of
@@ -54,22 +54,23 @@ step  e@(Env { state })= do
     (F, 0) -> next e 1 R E
     (F, 1) -> next e 1 R A
 
-checksum :: (H.HashTable h) => Env (h s Int Int) -> ST s Int
+checksum :: Env -> IO Int
 checksum (Env { tape }) = H.foldM (\c _ -> return $ c+1) 0 tape
 
-initialEnv :: ST s (Env (HB.HashTable s Int Int))
+initialEnv :: IO Env
 initialEnv = do
   t <- H.new
   return $ Env { tape = t, state = A, slot = 0}
 
-envAfter :: (H.HashTable h) => Int -> Env (h s Int Int) -> ST s (Env (h s Int Int))
+envAfter :: Int -> Env -> IO Env
 envAfter n e = do
   foldM (\e _ -> step e) e [1..n]
 
 run :: IO ()
 run = do
   let c = 12861455
-  e <- stToIO initialEnv
-  result <- (stToIO (fmap checksum (envAfter c e)))
+  e <- initialEnv
+  finalEnv <- (envAfter c e)
+  result <- checksum finalEnv
   putStrLn $ "checksum after " ++ (show c) ++ ": " ++ (show result)
 
